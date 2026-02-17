@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Little Surprise For You</title>
+    <title>The Journey of Us</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap');
 
         body {
             font-family: 'Quicksand', sans-serif;
-            background: #fff5f7;
+            background: #fff0f3;
             overflow: hidden;
             height: 100vh;
             margin: 0;
@@ -19,261 +19,433 @@
             justify-content: center;
         }
 
-        .cursive {
-            font-family: 'Pacifico', cursive;
-        }
-
-        .heart {
-            position: absolute;
-            pointer-events: none;
-            animation: float 3s linear forwards;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
-        }
+        .cursive { font-family: 'Pacifico', cursive; }
 
         .game-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 2px solid #ffb6c1;
-            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.3);
+            border: 4px solid #ffccd5;
+            box-shadow: 0 20px 50px rgba(255, 75, 110, 0.2);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        #no-btn {
-            transition: all 0.2s ease;
+            width: 90%;
+            max-width: 450px;
             position: relative;
         }
 
-        .hidden-section {
-            display: none;
-        }
+        .hidden-section { display: none !important; }
 
-        .floating-emoji {
+        /* Level 2: Close the Distance */
+        .track {
+            height: 80px;
+            background: #fff5f7;
+            border-radius: 40px;
+            position: relative;
+            border: 2px dashed #ffccd5;
+            overflow: hidden;
+        }
+        .avatar {
             position: absolute;
-            font-size: 2rem;
-            animation: bounce 2s infinite ease-in-out;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            transition: left 0.3s ease;
         }
+        #distraction-container { height: 100px; position: relative; }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
+        /* Level 3: Healing Fights */
+        .storm-cloud { animation: drift 3s infinite alternate ease-in-out; cursor: pointer; transition: transform 0.3s; }
+        .storm-cloud:hover { transform: scale(1.1); }
+        @keyframes drift { from { transform: translateX(-5px); } to { transform: translateX(5px); } }
 
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            animation: fall 4s linear infinite;
+        /* Level 4: Memory Match */
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .card {
+            aspect-ratio: 1;
+            background: #ff85a1;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transform-style: preserve-3d;
+            transition: transform 0.4s;
         }
+        .card.flipped { transform: rotateY(180deg); background: white; border: 2px solid #ff85a1; }
+        .card.matched { background: #ffd1dc; cursor: default; visibility: hidden; }
 
-        @keyframes fall {
-            to { transform: translateY(100vh) rotate(360deg); }
+        /* Level 5: Cooking Sim */
+        .pot-container { position: relative; width: 120px; height: 120px; margin: 0 auto; }
+        .pot { font-size: 80px; animation: shake 2s infinite ease-in-out; }
+        .steam {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            font-size: 20px; animation: steam-rise 2s infinite;
         }
+        @keyframes steam-rise {
+            0% { transform: translate(-50%, 0) scale(1); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translate(-50%, -40px) scale(1.5); opacity: 0; }
+        }
+        @keyframes shake { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+
+        /* Level 6: Supermarket */
+        .grocery-item { transition: all 0.3s; cursor: pointer; }
+        .grocery-item:hover { transform: translateY(-5px); }
+        .grocery-item.collected { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
+        @keyframes cart-wiggle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1) rotate(5deg); } }
+        .cart-bounce { animation: cart-wiggle 0.5s ease; }
+
+        @keyframes float-up { to { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
+        .particle { position: absolute; pointer-events: none; animation: float-up 4s linear forwards; }
+
+        #skip-heart {
+            position: fixed; bottom: 1.5rem; left: 1.5rem;
+            cursor: pointer; opacity: 0.15; transition: opacity 0.3s; z-index: 1000;
+        }
+        #skip-heart:hover { opacity: 0.6; }
     </style>
 </head>
 <body>
 
-    <!-- Stage 1: The Question -->
-    <div id="stage1" class="game-card p-8 rounded-3xl text-center max-w-sm mx-4 z-10">
-        <div class="text-6xl mb-4">💝</div>
-        <h1 class="text-3xl font-bold text-pink-600 mb-6 cursive">Do you love me?</h1>
-        <p class="text-gray-600 mb-8">I have a very important question to ask you today...</p>
-        
-        <div class="flex gap-4 justify-center relative">
-            <button id="yes-btn" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-110 transition">
-                Yes!
-            </button>
-            <button id="no-btn" class="bg-gray-200 text-gray-600 font-bold py-3 px-8 rounded-full shadow-md">
-                No
-            </button>
-        </div>
+    <!-- Hidden Skip Button -->
+    <div id="skip-heart" onclick="skipToNextLevel()" title="Skip level">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ff85a1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
     </div>
 
-    <!-- Stage 2: Catch the Hearts -->
-    <div id="stage2" class="hidden-section game-card p-8 rounded-3xl text-center max-w-md mx-4 z-10">
-        <h2 class="text-2xl font-bold text-pink-600 mb-2 cursive">Catch 10 Hearts!</h2>
-        <p class="text-gray-500 mb-4">Click the falling hearts to unlock my secret message</p>
-        <div class="text-4xl font-bold text-pink-400 mb-4">
-            <span id="score">0</span>/10
-        </div>
-        <div class="w-full bg-pink-100 rounded-full h-2">
-            <div id="progress" class="bg-pink-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-    </div>
-
-    <!-- Stage 3: The Finale -->
-    <div id="stage3" class="hidden-section text-center z-10 px-4">
-        <div class="scale-150 mb-8 inline-block animate-bounce">💖</div>
-        <h1 id="final-message" class="text-5xl md:text-7xl font-bold text-pink-600 cursive drop-shadow-lg">
-            i love u sooo much
-        </h1>
-        <div class="mt-8 space-y-2">
-            <p class="text-pink-400 animate-pulse text-xl">Forever and always</p>
-        </div>
-        <button onclick="location.reload()" class="mt-12 text-sm text-pink-300 underline opacity-50 hover:opacity-100 transition">
-            Restart Love?
+    <!-- Transition Note Section -->
+    <div id="transition-note" class="hidden-section game-card p-8 rounded-3xl text-center z-20">
+        <div class="text-5xl mb-4" id="note-emoji">💌</div>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-2">A Little Note</h2>
+        <p id="note-text" class="text-lg text-gray-700 font-semibold mb-8 cursive"></p>
+        <button onclick="proceedToNextStage()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-10 rounded-full shadow-lg transition transform hover:scale-105 active:scale-95 uppercase text-xs tracking-widest">
+            Continue Our Story
         </button>
     </div>
 
+    <!-- Level 1: Choosing Each Other -->
+    <div id="stage1" class="game-card p-8 rounded-3xl text-center z-10">
+        <div class="inline-block bg-pink-100 p-4 rounded-full mb-4">
+            <span class="text-4xl">💍</span>
+        </div>
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-2">Level 1: The Choice</h2>
+        <h1 class="text-3xl font-bold text-pink-600 mb-6 cursive">Will you always choose me?</h1>
+        <div class="flex gap-4 justify-center items-center h-24 relative">
+            <button id="yes-btn" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition active:scale-95">YES</button>
+            <button id="no-btn" class="bg-gray-200 text-gray-500 font-bold py-3 px-8 rounded-full shadow-md z-20">NO</button>
+        </div>
+        <p id="hint" class="mt-4 text-xs text-pink-300 italic opacity-0 transition-opacity">Hint: In this game and in life, there's only one answer.</p>
+    </div>
+
+    <!-- Level 2: Persistence (Distance) -->
+    <div id="stage2" class="hidden-section game-card p-8 rounded-3xl text-center z-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-1">Level 2: Commitment</h2>
+        <h1 class="text-2xl font-bold text-pink-600 mb-4 cursive">Close the Distance</h1>
+        <p class="text-xs text-gray-500 mb-6">Life's distractions try to pull us apart. Tap to stay close.</p>
+        <div class="track mb-6">
+            <div id="heart-left" class="avatar" style="left: 10%;">💖</div>
+            <div id="heart-right" class="avatar" style="left: 70%;">💗</div>
+        </div>
+        <div id="distraction-container" class="mb-4"></div>
+        <button id="tap-btn" class="w-full bg-pink-500 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-transform uppercase tracking-widest text-sm">HOLD ON TO US</button>
+    </div>
+
+    <!-- Level 3: Resilience (Fights) -->
+    <div id="stage3" class="hidden-section game-card p-8 rounded-3xl text-center z-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-1">Level 3: Resilience</h2>
+        <h1 class="text-2xl font-bold text-pink-600 mb-4 cursive">Healing the Rift</h1>
+        <p class="text-xs text-gray-500 mb-6">Arguments are just clouds passing by. Tap them to make things right.</p>
+        <div id="fight-arena" class="relative h-48 bg-blue-50 rounded-2xl overflow-hidden border-2 border-blue-100 mb-6 flex items-center justify-center">
+            <div id="empty-sky-msg" class="text-blue-300 text-xs italic">Sunlight is breaking through...</div>
+        </div>
+        <div class="flex justify-between items-center px-2">
+            <span class="text-xs font-bold text-pink-400">Harmony Score:</span>
+            <span id="fight-score" class="text-sm font-bold text-pink-600">0/10</span>
+        </div>
+        <div class="w-full bg-pink-100 rounded-full h-2 mt-2">
+            <div id="fight-progress" class="bg-pink-500 h-2 rounded-full transition-all" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Level 4: Memories -->
+    <div id="stage4" class="hidden-section game-card p-8 rounded-3xl text-center z-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-1">Level 4: Intimacy</h2>
+        <h1 class="text-2xl font-bold text-pink-600 mb-6 cursive">Remember Our Moments</h1>
+        <div id="memory-board" class="memory-grid mb-6"></div>
+        <p class="text-xs text-gray-400 italic">Every shared secret makes us one.</p>
+    </div>
+
+    <!-- Level 5: Effort (Kitchen) -->
+    <div id="stage5" class="hidden-section game-card p-8 rounded-3xl text-center z-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-1">Level 5: Dedication</h2>
+        <h1 class="text-2xl font-bold text-pink-600 mb-4 cursive">The Recipe of Love</h1>
+        <div class="mb-6 bg-pink-50 p-4 rounded-2xl border border-pink-100">
+            <p id="recipe-instruction" class="text-lg text-gray-700 font-semibold">Add <span class="text-pink-600">Kindness</span></p>
+        </div>
+        <div class="pot-container mb-8">
+            <div class="steam">💨</div>
+            <div class="pot">🍲</div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="addIngredient('Kindness', '🍭')" class="ingredient-btn bg-white border-2 border-pink-200 p-3 rounded-xl hover:bg-pink-50">
+                <span class="block text-2xl">🍭</span><span class="text-xs font-bold text-pink-400">Kindness</span>
+            </button>
+            <button onclick="addIngredient('Trust', '🛡️')" class="ingredient-btn bg-white border-2 border-pink-200 p-3 rounded-xl hover:bg-pink-50">
+                <span class="block text-2xl">🛡️</span><span class="text-xs font-bold text-pink-400">Trust</span>
+            </button>
+            <button onclick="addIngredient('Laughter', '😂')" class="ingredient-btn bg-white border-2 border-pink-200 p-3 rounded-xl hover:bg-pink-50">
+                <span class="block text-2xl">😂</span><span class="text-xs font-bold text-pink-400">Laughter</span>
+            </button>
+            <button onclick="addIngredient('Passion', '🔥')" class="ingredient-btn bg-white border-2 border-pink-200 p-3 rounded-xl hover:bg-pink-50">
+                <span class="block text-2xl">🔥</span><span class="text-xs font-bold text-pink-400">Passion</span>
+            </button>
+        </div>
+        <div id="cook-progress" class="mt-6 flex justify-center gap-2"></div>
+    </div>
+
+    <!-- Level 6: Future -->
+    <div id="stage6" class="hidden-section game-card p-8 rounded-3xl text-center z-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-pink-400 mb-1">Level 6: Vision</h2>
+        <h1 class="text-2xl font-bold text-pink-600 mb-4 cursive">Building Our Home</h1>
+        <p class="text-xs text-gray-500 mb-6">Gather the dreams we'll share together.</p>
+        <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="grocery-item" onclick="collectLifeItem(this, '🏠')">
+                <div class="text-4xl bg-pink-50 p-2 rounded-lg">🏠</div><p class="text-[10px] mt-1 font-bold text-pink-400 uppercase">Home</p>
+            </div>
+            <div class="grocery-item" onclick="collectLifeItem(this, '✈️')">
+                <div class="text-4xl bg-pink-50 p-2 rounded-lg">✈️</div><p class="text-[10px] mt-1 font-bold text-pink-400 uppercase">Travel</p>
+            </div>
+            <div class="grocery-item" onclick="collectLifeItem(this, '🐶')">
+                <div class="text-4xl bg-pink-50 p-2 rounded-lg">🐶</div><p class="text-[10px] mt-1 font-bold text-pink-400 uppercase">Pets</p>
+            </div>
+            <div class="grocery-item" onclick="collectLifeItem(this, '🍕')">
+                <div class="text-4xl bg-pink-50 p-2 rounded-lg">🍕</div><p class="text-[10px] mt-1 font-bold text-pink-400 uppercase">Dinners</p>
+            </div>
+            <div class="grocery-item" onclick="collectLifeItem(this, '💰')">
+                <div class="text-4xl bg-pink-50 p-2 rounded-lg">💰</div><p class="text-[10px] mt-1 font-bold text-pink-400 uppercase">Savings</p>
+            </div>
+            <div class="grocery-item" onclick="collectLifeItem(this, '🍼')">
+                <div class="text-4xl bg-pink-50 p-2 rounded-lg">🍼</div><p class="text-[10px] mt-1 font-bold text-pink-400 uppercase">Family</p>
+            </div>
+        </div>
+        <div id="life-cart" class="relative bg-pink-100 p-6 rounded-2xl flex items-center justify-center">
+            <span class="text-6xl cart-icon">🛒</span>
+            <div id="cart-counter" class="absolute top-2 right-2 bg-pink-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">0/6</div>
+        </div>
+    </div>
+
+    <!-- Final Scene -->
+    <div id="stage7" class="hidden-section text-center z-10 px-4">
+        <div class="mb-6 animate-bounce"><span class="text-8xl">💝</span></div>
+        <h1 class="text-4xl md:text-6xl font-bold text-pink-600 cursive drop-shadow-2xl leading-tight">My heart belongs to you,<br>forever & always.</h1>
+        <div class="mt-8 space-y-4">
+            <p class="text-pink-400 text-2xl animate-pulse">Thank you for being my everything.</p>
+            <button onclick="location.reload()" class="bg-white/50 hover:bg-white border border-pink-200 px-8 py-3 rounded-full text-pink-400 text-sm font-bold shadow-sm transition-all hover:shadow-md mt-6">Restart Our Story</button>
+        </div>
+    </div>
+
     <script>
+        let gameActive = false;
+        let nextStageId = '';
+        let currentStageIdx = 0;
+
+        const messages = [
+            { id: 'stage2', emoji: '✨', text: "Love isn't just a feeling, it's a decision. Every single day, I choose you." },
+            { id: 'stage3', emoji: '🔗', text: "Distance and time may try to separate us, but our commitment keeps us tied together." },
+            { id: 'stage4', emoji: '🌈', text: "Arguments happen, but they don't define us. It's how we heal that makes us stronger." },
+            { id: 'stage5', emoji: '📖', text: "Every memory we've shared is a page in the most beautiful book ever written." },
+            { id: 'stage6', emoji: '🍯', text: "Love is a recipe that requires patience and effort, but the result is always sweet." },
+            { id: 'stage7', emoji: '🏡', text: "The future is a blank canvas, and I can't wait to paint it with our shared dreams." }
+        ];
+
+        function showNote(nextId) {
+            gameActive = false;
+            nextStageId = nextId;
+            const note = messages.find(m => m.id === nextId);
+            
+            // Hide all stages
+            document.querySelectorAll('.game-card, #stage7').forEach(s => s.classList.add('hidden-section'));
+            
+            // Setup transition
+            document.getElementById('note-emoji').innerText = note.emoji;
+            document.getElementById('note-text').innerText = note.text;
+            document.getElementById('transition-note').classList.remove('hidden-section');
+        }
+
+        function proceedToNextStage() {
+            document.getElementById('transition-note').classList.add('hidden-section');
+            document.getElementById(nextStageId).classList.remove('hidden-section');
+            
+            // Trigger specific stage logic
+            if(nextStageId === 'stage2') startLevel2();
+            if(nextStageId === 'stage3') startLevel3();
+            if(nextStageId === 'stage4') startLevel4();
+            if(nextStageId === 'stage5') startLevel5();
+            if(nextStageId === 'stage6') startLevel6();
+            if(nextStageId === 'stage7') showFinale();
+        }
+
+        // Level 1 Logic
         const noBtn = document.getElementById('no-btn');
         const yesBtn = document.getElementById('yes-btn');
-        const stage1 = document.getElementById('stage1');
-        const stage2 = document.getElementById('stage2');
-        const stage3 = document.getElementById('stage3');
-        const scoreDisplay = document.getElementById('score');
-        const progressBar = document.getElementById('progress');
-
-        let score = 0;
-        let gameActive = false;
-
-        // Stage 1: The Running Button
-        noBtn.addEventListener('mouseover', moveButton);
-        noBtn.addEventListener('click', moveButton);
-        noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            moveButton();
-        });
-
-        function moveButton() {
+        const handleNo = () => {
             const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
             const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-            
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = x + 'px';
-            noBtn.style.top = y + 'px';
-            
-            // Make Yes button grow slightly each time they try to click No
-            const currentScale = parseFloat(yesBtn.style.transform.replace('scale(', '').replace(')', '')) || 1;
-            yesBtn.style.transform = `scale(${currentScale + 0.1})`;
-        }
+            noBtn.style.position = 'fixed'; noBtn.style.left = x + 'px'; noBtn.style.top = y + 'px';
+            document.getElementById('hint').style.opacity = '1';
+            yesBtn.style.transform = `scale(${1 + (Math.random() * 0.5)})`;
+        };
+        noBtn.addEventListener('mouseover', handleNo);
+        yesBtn.addEventListener('click', () => showNote('stage2'));
 
-        // Transition to Stage 2
-        yesBtn.addEventListener('click', () => {
-            stage1.classList.add('hidden-section');
-            stage2.classList.remove('hidden-section');
-            gameActive = true;
-            startHeartGame();
-        });
-
-        // Stage 2: Game Logic
-        function startHeartGame() {
-            const interval = setInterval(() => {
-                if (!gameActive) {
-                    clearInterval(interval);
-                    return;
-                }
-                createFallingHeart();
-            }, 800);
-        }
-
-        function createFallingHeart() {
-            const heart = document.createElement('div');
-            heart.innerHTML = '💗';
-            heart.className = 'absolute cursor-pointer text-3xl select-none transition-transform hover:scale-125';
-            heart.style.left = Math.random() * 90 + 'vw';
-            heart.style.top = '-50px';
-            heart.style.transition = 'top 4s linear';
-            
-            document.body.appendChild(heart);
-
-            // Animate falling
-            setTimeout(() => {
-                heart.style.top = '110vh';
+        // Level 2 Logic
+        let distance = 60;
+        let driftInterval;
+        function startLevel2() {
+            gameActive = true; distance = 60;
+            driftInterval = setInterval(() => {
+                if (!gameActive) return;
+                distance = Math.min(75, distance + 0.4);
+                document.getElementById('heart-right').style.left = (10 + distance) + '%';
             }, 100);
-
-            heart.addEventListener('mousedown', () => {
-                score++;
-                scoreDisplay.innerText = score;
-                progressBar.style.width = (score * 10) + '%';
-                
-                // Burst effect
-                createBurst(heart.offsetLeft, heart.offsetTop);
-                heart.remove();
-
-                if (score >= 10) {
-                    endGame();
-                }
-            });
-
-            // Cleanup
-            setTimeout(() => {
-                if (heart.parentNode) heart.remove();
-            }, 5000);
+            spawnDistraction();
+        }
+        document.getElementById('tap-btn').addEventListener('click', () => {
+            if(!gameActive) return;
+            distance = Math.max(0, distance - 5);
+            document.getElementById('heart-right').style.left = (10 + distance) + '%';
+            createExplosion(window.innerWidth/2, window.innerHeight/2, '❤️');
+            if(distance <= 0) { gameActive = false; clearInterval(driftInterval); setTimeout(() => showNote('stage3'), 500); }
+        });
+        function spawnDistraction() {
+            if(!gameActive) return;
+            const container = document.getElementById('distraction-container');
+            const d = document.createElement('div');
+            d.innerHTML = ['💼','📱','🕒','🌧️'][Math.floor(Math.random()*4)];
+            d.className = 'absolute text-2xl transition-all duration-1000';
+            d.style.left = Math.random()*80+'%'; d.style.bottom = '-20px';
+            container.appendChild(d);
+            setTimeout(() => { d.style.bottom = '100px'; d.style.opacity = '0'; distance = Math.min(80, distance+2); }, 50);
+            setTimeout(() => d.remove(), 1000);
+            setTimeout(spawnDistraction, 1500 + Math.random()*2000);
         }
 
-        function createBurst(x, y) {
-            for (let i = 0; i < 5; i++) {
-                const part = document.createElement('div');
-                part.innerHTML = '✨';
-                part.style.position = 'fixed';
-                part.style.left = x + 'px';
-                part.style.top = y + 'px';
-                part.className = 'pointer-events-none';
-                document.body.appendChild(part);
+        // Level 3 Logic
+        let fightScore = 0;
+        function startLevel3() { gameActive = true; fightScore = 0; spawnCloud(); }
+        function spawnCloud() {
+            if(!gameActive) return;
+            const arena = document.getElementById('fight-arena');
+            const cloud = document.createElement('div');
+            cloud.innerHTML = '⛈️'; cloud.className = 'storm-cloud absolute text-4xl cursor-pointer';
+            cloud.style.left = Math.random()*80+10+'%'; cloud.style.top = Math.random()*60+10+'%';
+            arena.appendChild(cloud);
+            cloud.onclick = () => {
+                fightScore++;
+                document.getElementById('fight-score').innerText = `${fightScore}/10`;
+                document.getElementById('fight-progress').style.width = (fightScore*10)+'%';
+                cloud.innerHTML = '💖'; cloud.style.transition = 'all 0.8s';
+                cloud.style.transform = 'translateY(-40px) scale(0)'; cloud.style.opacity = '0';
+                if(fightScore >= 10) { gameActive = false; setTimeout(() => showNote('stage4'), 1000); }
+                setTimeout(() => cloud.remove(), 800);
+            };
+            setTimeout(spawnCloud, 1200);
+        }
 
-                const angle = Math.random() * Math.PI * 2;
-                const dist = 50 + Math.random() * 50;
-                
-                part.animate([
-                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                    { transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`, opacity: 0 }
-                ], {
-                    duration: 1000,
-                    easing: 'ease-out'
-                }).onfinish = () => part.remove();
+        // Level 4 Logic
+        let matched = 0;
+        function startLevel4() {
+            const board = document.getElementById('memory-board'); board.innerHTML = '';
+            const ems = ['💖','🌹','💍','💌','🍭','🍓','🧸','🌈'];
+            let deck = [...ems, ...ems].sort(() => Math.random()-0.5);
+            let flipped = [];
+            deck.forEach(e => {
+                const c = document.createElement('div'); c.className = 'card'; c.dataset.e = e; c.innerHTML = '?';
+                c.onclick = () => {
+                    if(flipped.length === 2 || c.classList.contains('flipped')) return;
+                    c.classList.add('flipped'); c.innerHTML = e; flipped.push(c);
+                    if(flipped.length === 2) {
+                        setTimeout(() => {
+                            if(flipped[0].dataset.e === flipped[1].dataset.e) {
+                                flipped.forEach(x => x.classList.add('matched')); matched++;
+                                if(matched === 8) setTimeout(() => showNote('stage5'), 800);
+                            } else { flipped.forEach(x => { x.classList.remove('flipped'); x.innerHTML = '?'; }); }
+                            flipped = [];
+                        }, 600);
+                    }
+                };
+                board.appendChild(c);
+            });
+        }
+
+        // Level 5 Logic
+        const recipe = ['Kindness', 'Laughter', 'Trust', 'Kindness', 'Passion', 'Trust'];
+        let step = 0;
+        function startLevel5() { step = 0; updateRecipe(); }
+        function updateRecipe() {
+            document.getElementById('recipe-instruction').innerHTML = step < 6 ? `Add <span class="text-pink-600">${recipe[step]}</span>` : "Perfectly Brewed!";
+            const prog = document.getElementById('cook-progress'); prog.innerHTML = '';
+            recipe.forEach((_, i) => {
+                const d = document.createElement('div'); d.className = `h-2 w-6 rounded-full ${i < step ? 'bg-pink-500' : 'bg-pink-100'}`;
+                prog.appendChild(d);
+            });
+        }
+        function addIngredient(name, emoji) {
+            if(recipe[step] === name) {
+                step++; updateRecipe();
+                if(step >= 6) setTimeout(() => showNote('stage6'), 800);
+            } else {
+                const p = document.querySelector('.pot'); p.style.animation = 'none'; void p.offsetWidth; p.style.animation = 'shake 0.2s 3';
+                step = 0; updateRecipe();
             }
         }
 
-        // Final Stage
-        function endGame() {
-            gameActive = false;
-            stage2.classList.add('hidden-section');
-            stage3.classList.remove('hidden-section');
-            
-            // Continuous Celebration
-            setInterval(createConfetti, 150);
-            
-            // Heart Background
+        // Level 6 Logic
+        let cartItems = 0;
+        function startLevel6() { cartItems = 0; }
+        function collectLifeItem(el, emoji) {
+            if(el.classList.contains('collected')) return;
+            el.classList.add('collected'); cartItems++;
+            document.getElementById('cart-counter').innerText = `${cartItems}/6`;
+            const cart = document.getElementById('life-cart');
+            cart.classList.remove('cart-bounce'); void cart.offsetWidth; cart.classList.add('cart-bounce');
+            if(cartItems >= 6) setTimeout(() => showNote('stage7'), 1000);
+        }
+
+        function skipToNextLevel() {
+            const current = document.querySelector('.game-card:not(.hidden-section)');
+            if(!current) return;
+            const currentId = current.id;
+            const stages = ['stage1','stage2','stage3','stage4','stage5','stage6'];
+            const idx = stages.indexOf(currentId);
+            if(idx !== -1 && idx < stages.length - 1) showNote(stages[idx+1]);
+            else if(idx === stages.length - 1) showNote('stage7');
+        }
+
+        function showFinale() {
+            document.getElementById('skip-heart').style.display = 'none';
+            document.getElementById('stage7').classList.remove('hidden-section');
             setInterval(() => {
-                const h = document.createElement('div');
-                h.innerHTML = ['❤️', '💖', '💝', '💕'][Math.floor(Math.random()*4)];
-                h.className = 'heart text-2xl';
-                h.style.left = Math.random() * 100 + 'vw';
-                h.style.bottom = '-50px';
-                document.body.appendChild(h);
-                setTimeout(() => h.remove(), 3000);
-            }, 300);
+                const c = document.createElement('div');
+                c.className = 'particle fixed z-0 text-xl';
+                c.innerHTML = ['❤️','💖','⭐','🌸'][Math.floor(Math.random()*4)];
+                c.style.left = Math.random()*100+'vw'; c.style.bottom = '-50px';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 4000);
+            }, 200);
         }
 
-        function createConfetti() {
-            const colors = ['#ff69b4', '#ff1493', '#ffc0cb', '#ffb6c1'];
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.top = '-10px';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-            document.body.appendChild(confetti);
-            
-            setTimeout(() => confetti.remove(), 4000);
+        function createExplosion(x, y, char) {
+            for(let i=0; i<6; i++) {
+                const p = document.createElement('div'); p.innerHTML = char;
+                p.className = 'fixed pointer-events-none z-[100]';
+                p.style.left = x + 'px'; p.style.top = y + 'px';
+                document.body.appendChild(p);
+                const a = Math.random()*Math.PI*2; const d = 40+Math.random()*60;
+                p.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(0)`,opacity:0}],{duration:800}).onfinish = () => p.remove();
+            }
         }
-
-        // Aesthetic background floating icons
-        function spawnFloatingBackground() {
-            const emojis = ['🌸', '✨', '🎈', '🧸'];
-            const e = document.createElement('div');
-            e.className = 'floating-emoji opacity-20';
-            e.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            e.style.left = Math.random() * 90 + 'vw';
-            e.style.top = Math.random() * 90 + 'vh';
-            document.body.appendChild(e);
-        }
-
-        for(let i=0; i<6; i++) spawnFloatingBackground();
     </script>
 </body>
 </html>
