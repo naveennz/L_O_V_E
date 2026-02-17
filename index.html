@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Little Surprise For You</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #fff5f7;
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cursive {
+            font-family: 'Pacifico', cursive;
+        }
+
+        .heart {
+            position: absolute;
+            pointer-events: none;
+            animation: float 3s linear forwards;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid #ffb6c1;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.3);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #no-btn {
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: fall 4s linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Stage 1: The Question -->
+    <div id="stage1" class="game-card p-8 rounded-3xl text-center max-w-sm mx-4 z-10">
+        <div class="text-6xl mb-4">💝</div>
+        <h1 class="text-3xl font-bold text-pink-600 mb-6 cursive">Do you love me?</h1>
+        <p class="text-gray-600 mb-8">I have a very important question to ask you today...</p>
+        
+        <div class="flex gap-4 justify-center relative">
+            <button id="yes-btn" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-110 transition">
+                Yes!
+            </button>
+            <button id="no-btn" class="bg-gray-200 text-gray-600 font-bold py-3 px-8 rounded-full shadow-md">
+                No
+            </button>
+        </div>
+    </div>
+
+    <!-- Stage 2: Catch the Hearts -->
+    <div id="stage2" class="hidden-section game-card p-8 rounded-3xl text-center max-w-md mx-4 z-10">
+        <h2 class="text-2xl font-bold text-pink-600 mb-2 cursive">Catch 10 Hearts!</h2>
+        <p class="text-gray-500 mb-4">Click the falling hearts to unlock my secret message</p>
+        <div class="text-4xl font-bold text-pink-400 mb-4">
+            <span id="score">0</span>/10
+        </div>
+        <div class="w-full bg-pink-100 rounded-full h-2">
+            <div id="progress" class="bg-pink-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- Stage 3: The Finale -->
+    <div id="stage3" class="hidden-section text-center z-10 px-4">
+        <div class="scale-150 mb-8 inline-block animate-bounce">💖</div>
+        <h1 id="final-message" class="text-5xl md:text-7xl font-bold text-pink-600 cursive drop-shadow-lg">
+            i love u sooo much
+        </h1>
+        <div class="mt-8 space-y-2">
+            <p class="text-pink-400 animate-pulse text-xl">Forever and always</p>
+        </div>
+        <button onclick="location.reload()" class="mt-12 text-sm text-pink-300 underline opacity-50 hover:opacity-100 transition">
+            Restart Love?
+        </button>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('no-btn');
+        const yesBtn = document.getElementById('yes-btn');
+        const stage1 = document.getElementById('stage1');
+        const stage2 = document.getElementById('stage2');
+        const stage3 = document.getElementById('stage3');
+        const scoreDisplay = document.getElementById('score');
+        const progressBar = document.getElementById('progress');
+
+        let score = 0;
+        let gameActive = false;
+
+        // Stage 1: The Running Button
+        noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('click', moveButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveButton();
+        });
+
+        function moveButton() {
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+            
+            // Make Yes button grow slightly each time they try to click No
+            const currentScale = parseFloat(yesBtn.style.transform.replace('scale(', '').replace(')', '')) || 1;
+            yesBtn.style.transform = `scale(${currentScale + 0.1})`;
+        }
+
+        // Transition to Stage 2
+        yesBtn.addEventListener('click', () => {
+            stage1.classList.add('hidden-section');
+            stage2.classList.remove('hidden-section');
+            gameActive = true;
+            startHeartGame();
+        });
+
+        // Stage 2: Game Logic
+        function startHeartGame() {
+            const interval = setInterval(() => {
+                if (!gameActive) {
+                    clearInterval(interval);
+                    return;
+                }
+                createFallingHeart();
+            }, 800);
+        }
+
+        function createFallingHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '💗';
+            heart.className = 'absolute cursor-pointer text-3xl select-none transition-transform hover:scale-125';
+            heart.style.left = Math.random() * 90 + 'vw';
+            heart.style.top = '-50px';
+            heart.style.transition = 'top 4s linear';
+            
+            document.body.appendChild(heart);
+
+            // Animate falling
+            setTimeout(() => {
+                heart.style.top = '110vh';
+            }, 100);
+
+            heart.addEventListener('mousedown', () => {
+                score++;
+                scoreDisplay.innerText = score;
+                progressBar.style.width = (score * 10) + '%';
+                
+                // Burst effect
+                createBurst(heart.offsetLeft, heart.offsetTop);
+                heart.remove();
+
+                if (score >= 10) {
+                    endGame();
+                }
+            });
+
+            // Cleanup
+            setTimeout(() => {
+                if (heart.parentNode) heart.remove();
+            }, 5000);
+        }
+
+        function createBurst(x, y) {
+            for (let i = 0; i < 5; i++) {
+                const part = document.createElement('div');
+                part.innerHTML = '✨';
+                part.style.position = 'fixed';
+                part.style.left = x + 'px';
+                part.style.top = y + 'px';
+                part.className = 'pointer-events-none';
+                document.body.appendChild(part);
+
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 50 + Math.random() * 50;
+                
+                part.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 1000,
+                    easing: 'ease-out'
+                }).onfinish = () => part.remove();
+            }
+        }
+
+        // Final Stage
+        function endGame() {
+            gameActive = false;
+            stage2.classList.add('hidden-section');
+            stage3.classList.remove('hidden-section');
+            
+            // Continuous Celebration
+            setInterval(createConfetti, 150);
+            
+            // Heart Background
+            setInterval(() => {
+                const h = document.createElement('div');
+                h.innerHTML = ['❤️', '💖', '💝', '💕'][Math.floor(Math.random()*4)];
+                h.className = 'heart text-2xl';
+                h.style.left = Math.random() * 100 + 'vw';
+                h.style.bottom = '-50px';
+                document.body.appendChild(h);
+                setTimeout(() => h.remove(), 3000);
+            }, 300);
+        }
+
+        function createConfetti() {
+            const colors = ['#ff69b4', '#ff1493', '#ffc0cb', '#ffb6c1'];
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => confetti.remove(), 4000);
+        }
+
+        // Aesthetic background floating icons
+        function spawnFloatingBackground() {
+            const emojis = ['🌸', '✨', '🎈', '🧸'];
+            const e = document.createElement('div');
+            e.className = 'floating-emoji opacity-20';
+            e.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            e.style.left = Math.random() * 90 + 'vw';
+            e.style.top = Math.random() * 90 + 'vh';
+            document.body.appendChild(e);
+        }
+
+        for(let i=0; i<6; i++) spawnFloatingBackground();
+    </script>
+</body>
+</html>
